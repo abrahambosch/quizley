@@ -1,0 +1,13 @@
+<?php
+
+/** @var \Illuminate\Database\Eloquent\Factory $factory */
+
+use App\Quiz;
+use Faker\Generator as Faker;
+
+$factory->define(Quiz::class, function (Faker $faker) {
+    return [
+        'name' => 'Test for ' . $faker->jobTitle,
+        'description' => $faker->paragraph
+    ];
+});

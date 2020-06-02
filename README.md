@@ -1,79 +1,128 @@
-<p align="center"><img src="https://res.cloudinary.com/dtfbvvkyp/image/upload/v1566331377/laravel-logolockup-cmyk-red.svg" width="400"></p>
+# Quiz
+Software to allow you to create quizes and for users to take them
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
+@author: Abraham Bosch <abrahambosch@gmail.com>
 
-## About Laravel
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Objects
+- User: a registered user. 
+- Quiz: Object to hold the name of the quiz, etc. 
+- Question: the question
+- QuestionChoice: a possible answer to a question
+- QuizAttempt: Header record for when a user takes the quiz
+- QuestionAttempt: Holds the answer a user gives to a question.  
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Local Environment
+Local environment is using DDEV - a set of useful scripts to manage docker. 
+```shell script
+ddev start  # start up the development environment
+ddev stop   # stip the devenlopment environment
+ddev ssh    # ssh into the application 
+ddev describe # shows ip addresses, database credentials, etc
+```
+### Laravel Commands
+```shell script
+php artisan route:list
+```
 
-## Learning Laravel
+## Steps used to setup this project
+```shell script
+composer create-project --prefer-dist laravel/laravel quiz-api
+cd quiz-api
+ddev config
+ddev start
+ddev ssh
+composer require laravel/ui
+php artisan ui react
+php artisan ui react --auth
+php artisan migrate
+php artisan make:model Quiz -mcr
+php artisan make:model Question -mcr
+php artisan make:model QuestionChoice -mcr
+php artisan make:model QuizAttempt -mcr
+php artisan make:model QuestionAttempt -mcr
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Routes
+```text
+abrahambosch@quiz-api-web:/var/www/html$ php artisan route:list
++--------+-----------+-------------------------------------------------------------------------------------------------+---------------------------+------------------------------------------------------------------------+--------------+
+| Domain | Method    | URI                                                                                             | Name                      | Action                                                                 | Middleware   |
++--------+-----------+-------------------------------------------------------------------------------------------------+---------------------------+------------------------------------------------------------------------+--------------+
+|        | GET|HEAD  | /                                                                                               |                           | Closure                                                                | web          |
+|        | POST      | api/quizzes                                                                                     | quizzes.store             | App\Http\Controllers\QuizController@store                              | web          |
+|        | GET|HEAD  | api/quizzes                                                                                     | quizzes.index             | App\Http\Controllers\QuizController@index                              | web          |
+|        | GET|HEAD  | api/quizzes/create                                                                              | quizzes.create            | App\Http\Controllers\QuizController@create                             | web          |
+|        | POST      | api/quizzes/{quiz_id}/questions                                                                 | questions.store           | App\Http\Controllers\QuestionController@store                          | web          |
+|        | GET|HEAD  | api/quizzes/{quiz_id}/questions                                                                 | questions.index           | App\Http\Controllers\QuestionController@index                          | web          |
+|        | GET|HEAD  | api/quizzes/{quiz_id}/questions/create                                                          | questions.create          | App\Http\Controllers\QuestionController@create                         | web          |
+|        | GET|HEAD  | api/quizzes/{quiz_id}/questions/{question_id}/question_choices                                  | question_choices.index    | App\Http\Controllers\QuestionChoiceController@index                    | web          |
+|        | POST      | api/quizzes/{quiz_id}/questions/{question_id}/question_choices                                  | question_choices.store    | App\Http\Controllers\QuestionChoiceController@store                    | web          |
+|        | GET|HEAD  | api/quizzes/{quiz_id}/questions/{question_id}/question_choices/create                           | question_choices.create   | App\Http\Controllers\QuestionChoiceController@create                   | web          |
+|        | GET|HEAD  | api/quizzes/{quiz_id}/questions/{question_id}/question_choices/{question_choice}                | question_choices.show     | App\Http\Controllers\QuestionChoiceController@show                     | web          |
+|        | DELETE    | api/quizzes/{quiz_id}/questions/{question_id}/question_choices/{question_choice}                | question_choices.destroy  | App\Http\Controllers\QuestionChoiceController@destroy                  | web          |
+|        | PUT|PATCH | api/quizzes/{quiz_id}/questions/{question_id}/question_choices/{question_choice}                | question_choices.update   | App\Http\Controllers\QuestionChoiceController@update                   | web          |
+|        | GET|HEAD  | api/quizzes/{quiz_id}/questions/{question_id}/question_choices/{question_choice}/edit           | question_choices.edit     | App\Http\Controllers\QuestionChoiceController@edit                     | web          |
+|        | DELETE    | api/quizzes/{quiz_id}/questions/{question}                                                      | questions.destroy         | App\Http\Controllers\QuestionController@destroy                        | web          |
+|        | GET|HEAD  | api/quizzes/{quiz_id}/questions/{question}                                                      | questions.show            | App\Http\Controllers\QuestionController@show                           | web          |
+|        | PUT|PATCH | api/quizzes/{quiz_id}/questions/{question}                                                      | questions.update          | App\Http\Controllers\QuestionController@update                         | web          |
+|        | GET|HEAD  | api/quizzes/{quiz_id}/questions/{question}/edit                                                 | questions.edit            | App\Http\Controllers\QuestionController@edit                           | web          |
+|        | GET|HEAD  | api/quizzes/{quiz_id}/quiz_attempts                                                             | quiz_attempts.index       | App\Http\Controllers\QuizAttemptController@index                       | web          |
+|        | POST      | api/quizzes/{quiz_id}/quiz_attempts                                                             | quiz_attempts.store       | App\Http\Controllers\QuizAttemptController@store                       | web          |
+|        | GET|HEAD  | api/quizzes/{quiz_id}/quiz_attempts/create                                                      | quiz_attempts.create      | App\Http\Controllers\QuizAttemptController@create                      | web          |
+|        | GET|HEAD  | api/quizzes/{quiz_id}/quiz_attempts/{quiz_attempt_id}/question_attempts                         | question_attempts.index   | App\Http\Controllers\QuestionAttemptController@index                   | web          |
+|        | POST      | api/quizzes/{quiz_id}/quiz_attempts/{quiz_attempt_id}/question_attempts                         | question_attempts.store   | App\Http\Controllers\QuestionAttemptController@store                   | web          |
+|        | GET|HEAD  | api/quizzes/{quiz_id}/quiz_attempts/{quiz_attempt_id}/question_attempts/create                  | question_attempts.create  | App\Http\Controllers\QuestionAttemptController@create                  | web          |
+|        | GET|HEAD  | api/quizzes/{quiz_id}/quiz_attempts/{quiz_attempt_id}/question_attempts/{question_attempt}      | question_attempts.show    | App\Http\Controllers\QuestionAttemptController@show                    | web          |
+|        | PUT|PATCH | api/quizzes/{quiz_id}/quiz_attempts/{quiz_attempt_id}/question_attempts/{question_attempt}      | question_attempts.update  | App\Http\Controllers\QuestionAttemptController@update                  | web          |
+|        | DELETE    | api/quizzes/{quiz_id}/quiz_attempts/{quiz_attempt_id}/question_attempts/{question_attempt}      | question_attempts.destroy | App\Http\Controllers\QuestionAttemptController@destroy                 | web          |
+|        | GET|HEAD  | api/quizzes/{quiz_id}/quiz_attempts/{quiz_attempt_id}/question_attempts/{question_attempt}/edit | question_attempts.edit    | App\Http\Controllers\QuestionAttemptController@edit                    | web          |
+|        | GET|HEAD  | api/quizzes/{quiz_id}/quiz_attempts/{quiz_attempt}                                              | quiz_attempts.show        | App\Http\Controllers\QuizAttemptController@show                        | web          |
+|        | DELETE    | api/quizzes/{quiz_id}/quiz_attempts/{quiz_attempt}                                              | quiz_attempts.destroy     | App\Http\Controllers\QuizAttemptController@destroy                     | web          |
+|        | PUT|PATCH | api/quizzes/{quiz_id}/quiz_attempts/{quiz_attempt}                                              | quiz_attempts.update      | App\Http\Controllers\QuizAttemptController@update                      | web          |
+|        | GET|HEAD  | api/quizzes/{quiz_id}/quiz_attempts/{quiz_attempt}/edit                                         | quiz_attempts.edit        | App\Http\Controllers\QuizAttemptController@edit                        | web          |
+|        | PUT|PATCH | api/quizzes/{quiz}                                                                              | quizzes.update            | App\Http\Controllers\QuizController@update                             | web          |
+|        | DELETE    | api/quizzes/{quiz}                                                                              | quizzes.destroy           | App\Http\Controllers\QuizController@destroy                            | web          |
+|        | GET|HEAD  | api/quizzes/{quiz}                                                                              | quizzes.show              | App\Http\Controllers\QuizController@show                               | web          |
+|        | GET|HEAD  | api/quizzes/{quiz}/edit                                                                         | quizzes.edit              | App\Http\Controllers\QuizController@edit                               | web          |
+|        | GET|HEAD  | api/user                                                                                        |                           | Closure                                                                | api,auth:api |
+|        | GET|HEAD  | home                                                                                            | home                      | App\Http\Controllers\HomeController@index                              | web,auth     |
+|        | POST      | login                                                                                           |                           | App\Http\Controllers\Auth\LoginController@login                        | web,guest    |
+|        | GET|HEAD  | login                                                                                           | login                     | App\Http\Controllers\Auth\LoginController@showLoginForm                | web,guest    |
+|        | POST      | logout                                                                                          | logout                    | App\Http\Controllers\Auth\LoginController@logout                       | web          |
+|        | GET|HEAD  | password/confirm                                                                                | password.confirm          | App\Http\Controllers\Auth\ConfirmPasswordController@showConfirmForm    | web,auth     |
+|        | POST      | password/confirm                                                                                |                           | App\Http\Controllers\Auth\ConfirmPasswordController@confirm            | web,auth     |
+|        | POST      | password/email                                                                                  | password.email            | App\Http\Controllers\Auth\ForgotPasswordController@sendResetLinkEmail  | web          |
+|        | POST      | password/reset                                                                                  | password.update           | App\Http\Controllers\Auth\ResetPasswordController@reset                | web          |
+|        | GET|HEAD  | password/reset                                                                                  | password.request          | App\Http\Controllers\Auth\ForgotPasswordController@showLinkRequestForm | web          |
+|        | GET|HEAD  | password/reset/{token}                                                                          | password.reset            | App\Http\Controllers\Auth\ResetPasswordController@showResetForm        | web          |
+|        | POST      | register                                                                                        |                           | App\Http\Controllers\Auth\RegisterController@register                  | web,guest    |
+|        | GET|HEAD  | register                                                                                        | register                  | App\Http\Controllers\Auth\RegisterController@showRegistrationForm      | web,guest    |
++--------+-----------+-------------------------------------------------------------------------------------------------+---------------------------+------------------------------------------------------------------------+--------------+
 
-## Laravel Sponsors
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- [UserInsights](https://userinsights.com)
-- [Fragrantica](https://www.fragrantica.com)
-- [SOFTonSOFA](https://softonsofa.com/)
-- [User10](https://user10.com)
-- [Soumettre.fr](https://soumettre.fr/)
-- [CodeBrisk](https://codebrisk.com)
-- [1Forge](https://1forge.com)
-- [TECPRESSO](https://tecpresso.co.jp/)
-- [Runtime Converter](http://runtimeconverter.com/)
-- [WebL'Agence](https://weblagence.com/)
-- [Invoice Ninja](https://www.invoiceninja.com)
-- [iMi digital](https://www.imi-digital.de/)
-- [Earthlink](https://www.earthlink.ro/)
-- [Steadfast Collective](https://steadfastcollective.com/)
-- [We Are The Robots Inc.](https://watr.mx/)
-- [Understand.io](https://www.understand.io/)
-- [Abdel Elrafa](https://abdelelrafa.com)
-- [Hyper Host](https://hyper.host)
-- [Appoly](https://www.appoly.co.uk)
-- [OP.GG](https://op.gg)
-- [云软科技](http://www.yunruan.ltd/)
+## Testing
+```shell script
+php artisan test  # run the tests
+php artisan make:test QuizTest
+php artisan make:test QuizAttemptsTest
 
-## Contributing
+# To setup sqlite for testing environment
+touch /var/www/html/database/test.sqlite
+php artisan migrate --seed --env=testing  # setup 
+php artisan migrate:rollback --env=testing  # to rollback migrations. 
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# create factories for the database seeding  
+php artisan make:factory QuizFactory --model=Quiz
+```
 
-## Code of Conduct
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## clearing cache
+```shell script
+php artisan cache:clear && php artisan route:clear && php artisan config:clear && php artisan view:clear
+```
